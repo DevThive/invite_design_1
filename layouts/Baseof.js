@@ -4,6 +4,7 @@ import Footer from "@partials/Footer";
 import Header from "@partials/Header";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import TestComponent from "./components/mainimage";
 
 const Base = ({
   title,
@@ -17,6 +18,8 @@ const Base = ({
   const { meta_image, meta_author, meta_description } = config.metadata;
   const { base_url } = config.site;
   const router = useRouter();
+
+  const isHome = router.pathname === "/";
 
   return (
     <>
@@ -91,7 +94,9 @@ const Base = ({
       </Head>
       <Header />
       {/* main site */}
+      {isHome && <TestComponent />}
       <main>{children}</main>
+      {/* {console.log(children)} */}
       <Footer />
     </>
   );

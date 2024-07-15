@@ -7,23 +7,20 @@ import Link from "next/link";
 const Posts = ({ posts, authors, className }) => {
   const { summary_length } = config.settings;
   return (
-    <div className={`row space-y-16 ${className}`}>
+    <div className={`grid grid-cols-1 gap-16 sm:grid-cols-3 ${className}`}>
       {posts.map((post, i) => (
-        <div
-          key={`key-${i}`}
-          className={i === 0 ? "col-12" : "col-12 sm:col-6"}
-        >
+        <div key={`key-${i}`} className="flex flex-col">
           {post.frontmatter.image && (
             <Image
               className="rounded-lg"
               src={post.frontmatter.image}
               alt={post.frontmatter.title}
-              width={i === 0 ? "925" : "445"}
-              height={i === 0 ? "475" : "230"}
-              priority={i === 0 ? true : false}
+              width="297" // A4 크기의 너비 (픽셀로 조정 필요)
+              height="420" // A4 크기의 높이 (픽셀로 조정 필요)
+              priority={false}
             />
           )}
-          <ul className="mt-4 mb-4 flex flex-wrap items-center space-x-3 text-text">
+          <ul className="mb-4 mt-4 flex flex-wrap items-center space-x-3 text-text">
             <li>
               {authors
                 .filter((author) =>

@@ -2,7 +2,7 @@ import config from "@config/config.json";
 import NotFound from "@layouts/404";
 import About from "@layouts/About";
 import Base from "@layouts/Baseof";
-import Contact from "@layouts/Contact";
+import Design from "@layouts/Design";
 import Default from "@layouts/Default";
 import PostSingle from "@layouts/PostSingle";
 import { getRegularPage, getSinglePage } from "@lib/contentParser";
@@ -14,6 +14,7 @@ const RegularPages = ({ slug, data, postSlug, authors, posts }) => {
     data.frontmatter;
   const { content } = data;
 
+  // console.log(layout); // layout 값을 확인하세요.
   return (
     <Base
       title={title}
@@ -30,8 +31,8 @@ const RegularPages = ({ slug, data, postSlug, authors, posts }) => {
         <NotFound data={data} />
       ) : layout === "about" ? (
         <About data={data} />
-      ) : layout === "contact" ? (
-        <Contact data={data} />
+      ) : layout === "design" ? (
+        <Design data={data} />
       ) : (
         <Default data={data} />
       )}

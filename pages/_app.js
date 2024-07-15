@@ -10,25 +10,34 @@ const App = ({ Component, pageProps }) => {
   // import google font css
   const pf = theme.fonts.font_family.primary;
   const sf = theme.fonts.font_family.secondary;
-  const [fontcss, setFontcss] = useState();
+  const [fontcss, setFontcss] = useState("");
+
   useEffect(() => {
-    fetch(
-      `https://fonts.googleapis.com/css2?family=${pf}${
-        sf ? "&family=" + sf : ""
-      }&display=swap`
-    ).then((res) => res.text().then((css) => setFontcss(css)));
+    const fetchFontCSS = async () => {
+      const res = await fetch(
+        `https://fonts.googleapis.com/css2?family=${pf}${
+          sf ? "&family=" + sf : ""
+        }&display=swap`
+      );
+      const css = await res.text();
+      setFontcss(css);
+    };
+
+    fetchFontCSS();
   }, [pf, sf]);
 
   // google tag manager (gtm)
   const tagManagerArgs = {
     gtmId: config.params.tag_manager_id,
   };
+
   useEffect(() => {
     setTimeout(() => {
-      config.params.tag_manager_id && TagManager.initialize(tagManagerArgs);
+      if (config.params.tag_manager_id) {
+        TagManager.initialize(tagManagerArgs);
+      }
     }, 5000);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [tagManagerArgs]);
 
   return (
     <JsonContext>
@@ -39,11 +48,13 @@ const App = ({ Component, pageProps }) => {
           href="https://fonts.gstatic.com"
           crossOrigin="true"
         />
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `${fontcss}`,
-          }}
-        />
+        {fontcss && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `${fontcss}`,
+            }}
+          />
+        )}
         {/* responsive meta */}
         <meta
           name="viewport"

@@ -13,8 +13,16 @@ const AuthModal = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="mx-auto max-w-xl rounded-lg bg-white p-6">
-        <h2 className="mb-4 text-xl">로그인 / 회원가입</h2>
+      <div
+        className="mx-auto rounded-lg bg-white p-6"
+        style={{ width: "60%", maxWidth: "800px" }} // 여기서 너비와 최대 너비를 설정
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl">로그인 / 회원가입</h2>
+          <button className="text-gray-600" onClick={onClose}>
+            닫기
+          </button>
+        </div>
         <div className="mb-4 flex justify-center">
           <button
             className={`mr-2 px-4 py-2 ${
@@ -126,9 +134,6 @@ const AuthModal = ({ isOpen, onClose }) => {
             </form>
           </div>
         )}
-        <button className="mt-4 text-gray-600" onClick={onClose}>
-          닫기
-        </button>
       </div>
     </div>
   );
@@ -238,13 +243,7 @@ const Header = () => {
               className="nav-link inline-flex items-center text-sm"
               onClick={() => setAuthModal(true)}
             >
-              로그인
-            </button>
-            <button
-              className="nav-link inline-flex items-center text-sm"
-              onClick={() => setAuthModal(true)}
-            >
-              회원가입
+              로그인/회원가입
             </button>
           </div>
 
