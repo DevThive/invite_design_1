@@ -1,17 +1,145 @@
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { IoSearch } from "react-icons/io5";
 import Logo from "@components/Logo";
 import menu from "@config/menu.json";
 import SearchModal from "@layouts/partials/SearchModal";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
-import { IoSearch } from "react-icons/io5";
+
+// 로그인 및 회원가입 모달 컴포넌트
+const AuthModal = ({ isOpen, onClose }) => {
+  const [activeTab, setActiveTab] = useState("login");
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="mx-auto max-w-xl rounded-lg bg-white p-6">
+        <h2 className="mb-4 text-xl">로그인 / 회원가입</h2>
+        <div className="mb-4 flex justify-center">
+          <button
+            className={`mr-2 px-4 py-2 ${
+              activeTab === "login"
+                ? "bg-yellow-400 text-black"
+                : "bg-gray-200 text-gray-600"
+            }`}
+            onClick={() => setActiveTab("login")}
+          >
+            로그인
+          </button>
+          <button
+            className={`px-4 py-2 ${
+              activeTab === "signup"
+                ? "bg-yellow-400 text-black"
+                : "bg-gray-200 text-gray-600"
+            }`}
+            onClick={() => setActiveTab("signup")}
+          >
+            회원가입
+          </button>
+        </div>
+        {activeTab === "login" && (
+          <div>
+            <form>
+              <div className="mb-4">
+                <label className="block text-gray-700">아이디</label>
+                <input
+                  type="text"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="아이디를 입력하세요"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">비밀번호</label>
+                <input
+                  type="password"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="비밀번호를 입력하세요"
+                />
+              </div>
+              <button
+                type="submit"
+                className="mb-4 w-full rounded bg-yellow-400 px-4 py-2 text-black"
+              >
+                로그인
+              </button>
+            </form>
+            <button
+              className="w-full rounded bg-yellow-400 px-4 py-2 text-black"
+              onClick={() => {
+                // 여기에 카카오 로그인 로직을 추가하세요
+                alert("카카오 로그인");
+              }}
+            >
+              카카오 로그인하기
+            </button>
+          </div>
+        )}
+        {activeTab === "signup" && (
+          <div>
+            <form>
+              <div className="mb-4">
+                <label className="block text-gray-700">아이디</label>
+                <input
+                  type="text"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="아이디를 입력하세요"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">이메일</label>
+                <input
+                  type="email"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="이메일을 입력하세요"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">닉네임</label>
+                <input
+                  type="text"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="닉네임을 입력하세요"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">비밀번호</label>
+                <input
+                  type="password"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="비밀번호를 입력하세요"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-gray-700">비밀번호 확인</label>
+                <input
+                  type="password"
+                  className="mt-1 w-full rounded border-gray-300 p-2"
+                  placeholder="비밀번호를 다시 입력하세요"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full rounded bg-yellow-400 px-4 py-2 text-black"
+              >
+                회원가입
+              </button>
+            </form>
+          </div>
+        )}
+        <button className="mt-4 text-gray-600" onClick={onClose}>
+          닫기
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const Header = () => {
-  // distructuring the main menu from menu object
   const { main } = menu;
 
-  // states declaration
   const [navFixed, setNavFixed] = useState(false);
   const [searchModal, setSearchModal] = useState(false);
+  const [authModal, setAuthModal] = useState(false);
 
   useEffect(() => {
     const changeNavbarBackground = () => {
@@ -32,11 +160,9 @@ const Header = () => {
         }`}
       >
         <nav className="navbar container">
-          {/* logo */}
           <div className="order-0">
             <Logo />
           </div>
-          {/* navbar toggler */}
           <input id="nav-toggle" type="checkbox" className="hidden" />
           <label
             id="show-button"
@@ -61,7 +187,6 @@ const Header = () => {
               />
             </svg>
           </label>
-          {/* /navbar toggler */}
 
           <ul
             id="nav-menu"
@@ -100,7 +225,7 @@ const Header = () => {
               </React.Fragment>
             ))}
           </ul>
-          <div className="order-1 ml-auto md:order-2 md:ml-0">
+          <div className="order-1 ml-auto flex items-center md:order-2 md:ml-0">
             <div
               className="cursor-pointer p-2 text-xl text-dark hover:text-primary"
               onClick={() => {
@@ -109,12 +234,25 @@ const Header = () => {
             >
               <IoSearch />
             </div>
+            <button
+              className="nav-link inline-flex items-center text-sm"
+              onClick={() => setAuthModal(true)}
+            >
+              로그인
+            </button>
+            <button
+              className="nav-link inline-flex items-center text-sm"
+              onClick={() => setAuthModal(true)}
+            >
+              회원가입
+            </button>
           </div>
 
           <SearchModal
             searchModal={searchModal}
             setSearchModal={setSearchModal}
           />
+          <AuthModal isOpen={authModal} onClose={() => setAuthModal(false)} />
         </nav>
       </header>
     </>
