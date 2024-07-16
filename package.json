@@ -12,6 +12,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "cropperjs": "^1.6.2",
     "github-slugger": "^2.0.0",
     "gray-matter": "^4.0.3",
     "html2canvas": "^1.4.1",
@@ -24,6 +25,7 @@
     "react-easy-crop": "^5.0.7",
     "react-gtm-module": "^2.0.11",
     "react-icons": "^4.7.1",
+    "react-modal": "^3.16.1",
     "rehype-slug": "^5.1.0",
     "remark-gfm": "^3.0.1"
   },
