@@ -1,10 +1,14 @@
+import Link from "next/link";
+
 const TestComponent = () => {
   return (
     <section className="section">
       <div className="container">
         <div className="image-container">
-          <img src="/images/author.jpg" alt="example" className="image" />
-          <button className="create-button">제작하기</button>
+          <img src="/images/mainlogo2.png" alt="example" className="image" />
+          <Link href="/design">
+            <a className="create-button">제작하기</a>
+          </Link>
         </div>
       </div>
       <style jsx>{`
@@ -27,10 +31,10 @@ const TestComponent = () => {
           right: 10%;
           transform: translateY(-50%);
           padding: 12px 24px;
-          background-color: #007bff;
-          color: white;
+          background-color: #808080; /* 배경색을 회색으로 변경 */
+          color: #ffffff; /* 글씨를 흐린 검은색으로 변경 */
           border: none;
-          border-radius: 25px; /* 끝을 라운드 처리 */
+          border-radius: 10px; /* 끝을 라운드 처리 값을 줄임 */
           font-size: 16px;
           font-weight: bold;
           box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* 그림자 추가 */
