@@ -4,10 +4,87 @@ import { IoSearch } from "react-icons/io5";
 import Logo from "@components/Logo";
 import menu from "@config/menu.json";
 import SearchModal from "@layouts/partials/SearchModal";
+import axios from "axios";
 
 // 로그인 및 회원가입 모달 컴포넌트
 const AuthModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("login");
+  const [username, setUsername] = useState("");
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(null);
+  const [email, setEmail] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [password, setPassword] = useState("");
+  // const [checkpassword, setcheckPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordMatch, setPasswordMatch] = useState(null);
+
+  const checkUsernameAvailability = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:4001/users/checkid?username=${username}`
+      );
+      setIsUsernameAvailable(response.data.available);
+    } catch (error) {
+      console.error("아이디 중복 검사 오류:", error);
+      setIsUsernameAvailable(false);
+    }
+  };
+
+  const handleSignup = async (event) => {
+    event.preventDefault();
+
+    if (password !== confirmPassword) {
+      alert("비밀번호가 일치하지 않습니다.");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:4001/auth/signup", {
+        username,
+        email,
+        nickname,
+        password,
+        checkPassword: confirmPassword,
+      });
+
+      if (response.status === 200) {
+        const data = response.data;
+        alert("회원가입 성공: " + JSON.stringify(data));
+        // 회원가입 성공 후 필요한 동작을 여기에 추가하세요
+      }
+    } catch (error) {
+      alert("회원가입 실패: " + error.message);
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    setPasswordMatch(e.target.value === confirmPassword);
+  };
+
+  const handleConfirmPasswordChange = (e) => {
+    setConfirmPassword(e.target.value);
+    setPasswordMatch(e.target.value === password);
+  };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await axios.post("http://localhost:4001/auth/login", {
+        username,
+        password,
+      });
+
+      if (response.status === 200) {
+        const data = response.data;
+        alert("로그인 성공: " + JSON.stringify(data));
+        // 로그인 성공 후 필요한 동작을 여기에 추가하세요
+      }
+    } catch (error) {
+      alert("로그인 실패: " + error.response?.statusText || error.message);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -47,13 +124,15 @@ const AuthModal = ({ isOpen, onClose }) => {
         </div>
         {activeTab === "login" && (
           <div>
-            <form>
+            <form onSubmit={handleLogin}>
               <div className="mb-4">
                 <label className="block text-gray-700">아이디</label>
                 <input
                   type="text"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="아이디를 입력하세요"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                 />
               </div>
               <div className="mb-4">
@@ -62,6 +141,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="password"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="비밀번호를 입력하세요"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
               <button
@@ -84,14 +165,36 @@ const AuthModal = ({ isOpen, onClose }) => {
         )}
         {activeTab === "signup" && (
           <div>
-            <form>
+            <form onSubmit={handleSignup}>
               <div className="mb-4">
                 <label className="block text-gray-700">아이디</label>
-                <input
-                  type="text"
-                  className="mt-1 w-full rounded border-gray-300 p-2"
-                  placeholder="아이디를 입력하세요"
-                />
+                <div className="flex">
+                  <input
+                    type="text"
+                    className="mr-2 mt-1 w-full rounded border-gray-300 p-2"
+                    placeholder="아이디를 입력하세요"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="mt-1 rounded bg-blue-500 px-4 py-2 text-white"
+                    onClick={checkUsernameAvailability}
+                  >
+                    중복검사
+                  </button>
+                </div>
+                {isUsernameAvailable !== null && (
+                  <p
+                    className={`mt-1 text-sm ${
+                      isUsernameAvailable ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {isUsernameAvailable
+                      ? "사용 가능한 아이디입니다."
+                      : "이미 사용 중인 아이디입니다."}
+                  </p>
+                )}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700">이메일</label>
@@ -99,6 +202,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="email"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="이메일을 입력하세요"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="mb-4">
@@ -107,6 +212,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="text"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="닉네임을 입력하세요"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
                 />
               </div>
               <div className="mb-4">
@@ -115,6 +222,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="password"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="비밀번호를 입력하세요"
+                  value={password}
+                  onChange={handlePasswordChange}
                 />
               </div>
               <div className="mb-4">
@@ -123,7 +232,20 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="password"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="비밀번호를 다시 입력하세요"
+                  value={confirmPassword}
+                  onChange={handleConfirmPasswordChange}
                 />
+                {passwordMatch !== null && (
+                  <p
+                    className={`mt-1 text-sm ${
+                      passwordMatch ? "text-green-500" : "text-red-500"
+                    }`}
+                  >
+                    {passwordMatch
+                      ? "비밀번호가 일치합니다."
+                      : "비밀번호가 일치하지 않습니다."}
+                  </p>
+                )}
               </div>
               <button
                 type="submit"
