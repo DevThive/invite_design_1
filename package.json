@@ -27,6 +27,7 @@
     "react-gtm-module": "^2.0.11",
     "react-icons": "^4.7.1",
     "react-modal": "^3.16.1",
+    "react-router-dom": "^6.25.1",
     "rehype-slug": "^5.1.0",
     "remark-gfm": "^3.0.1"
   },

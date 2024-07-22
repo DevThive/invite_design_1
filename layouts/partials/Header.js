@@ -10,10 +10,14 @@ import axios from "axios";
 const AuthModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("login");
   const [username, setUsername] = useState("");
+  const [signupusername, setSignupUsername] = useState("");
+
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(null);
   const [email, setEmail] = useState("");
   const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
+  const [signuppassword, setSignupPassword] = useState("");
+
   // const [checkpassword, setcheckPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(null);
@@ -21,7 +25,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const checkUsernameAvailability = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:4001/users/checkid?username=${username}`
+        `http://localhost:4001/users/checkid?username=${signupusername}`
       );
       setIsUsernameAvailable(response.data.available);
     } catch (error) {
@@ -40,10 +44,10 @@ const AuthModal = ({ isOpen, onClose }) => {
 
     try {
       const response = await axios.post("http://localhost:4001/auth/signup", {
-        username,
+        username: signupusername,
         email,
         nickname,
-        password,
+        password: signuppassword,
         checkPassword: confirmPassword,
       });
 
@@ -58,13 +62,13 @@ const AuthModal = ({ isOpen, onClose }) => {
   };
 
   const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
+    setSignupPassword(e.target.value);
     setPasswordMatch(e.target.value === confirmPassword);
   };
 
   const handleConfirmPasswordChange = (e) => {
     setConfirmPassword(e.target.value);
-    setPasswordMatch(e.target.value === password);
+    setPasswordMatch(e.target.value === signuppassword);
   };
 
   const handleLogin = async (event) => {
@@ -76,13 +80,20 @@ const AuthModal = ({ isOpen, onClose }) => {
         password,
       });
 
-      if (response.status === 200) {
+      if (response.status === 201) {
         const data = response.data;
-        alert("로그인 성공: " + JSON.stringify(data));
+
+        // alert("로그인 성공: " + JSON.stringify(data));
+        // 로컬 스토리지에 액세스 토큰과 사용자 데이터 저장
+        localStorage.setItem("access_token", data.accessToken);
+        localStorage.setItem("user_data", JSON.stringify(data.userData));
+
         // 로그인 성공 후 필요한 동작을 여기에 추가하세요
+        window.location.href = "/"; // 메인 페이지로 이동
       }
     } catch (error) {
-      alert("로그인 실패: " + error.response?.statusText || error.message);
+      alert("로그인 실패: " + error.response.data.message);
+      // console.log(error);
     }
   };
 
@@ -173,8 +184,8 @@ const AuthModal = ({ isOpen, onClose }) => {
                     type="text"
                     className="mr-2 mt-1 w-full rounded border-gray-300 p-2"
                     placeholder="아이디를 입력하세요"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={signupusername}
+                    onChange={(e) => setSignupUsername(e.target.value)}
                   />
                   <button
                     type="button"
@@ -222,7 +233,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="password"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="비밀번호를 입력하세요"
-                  value={password}
+                  value={signuppassword}
                   onChange={handlePasswordChange}
                 />
               </div>
@@ -267,6 +278,9 @@ const Header = () => {
   const [navFixed, setNavFixed] = useState(false);
   const [searchModal, setSearchModal] = useState(false);
   const [authModal, setAuthModal] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [loginCheck, setLoginCheck] = useState(0);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const changeNavbarBackground = () => {
@@ -278,6 +292,30 @@ const Header = () => {
     };
     window.addEventListener("scroll", changeNavbarBackground);
   });
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const storedToken = window.localStorage.getItem("access_token");
+      const userdata = window.localStorage.getItem("user_data");
+      const token = storedToken;
+
+      if (token) {
+        setLoginCheck(1);
+        setUserData(JSON.parse(userdata));
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  const handleLogout = () => {
+    // 로컬 스토리지에서 액세스 토큰과 사용자 데이터 삭제
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_data");
+
+    // 로그아웃 후 필요한 동작 추가 (예: 메인 화면으로 리다이렉트)
+    window.location.href = "/"; // 또는 React Router를 사용하는 경우 navigate('/') 사용
+  };
 
   return (
     <>
@@ -355,18 +393,45 @@ const Header = () => {
           <div className="order-1 ml-auto flex items-center md:order-2 md:ml-0">
             <div
               className="cursor-pointer p-2 text-xl text-dark hover:text-primary"
-              onClick={() => {
-                setSearchModal(true);
-              }}
+              onClick={() => setSearchModal(true)}
             >
               <IoSearch />
             </div>
-            <button
-              className="nav-link inline-flex items-center text-sm"
-              onClick={() => setAuthModal(true)}
-            >
-              로그인/회원가입
-            </button>
+
+            {loginCheck === 0 ? (
+              <button
+                className="nav-link inline-flex items-center text-sm"
+                onClick={() => setAuthModal(true)}
+              >
+                로그인/회원가입
+              </button>
+            ) : (
+              <div
+                className="relative inline-flex items-center text-sm"
+                onMouseEnter={() => setShowMenu(true)}
+                onMouseLeave={() => setShowMenu(false)}
+              >
+                <span className="nav-link cursor-pointer">
+                  {userData.username}
+                </span>
+                {showMenu && (
+                  <div className="absolute left-0 mt-2 w-40 rounded bg-white shadow-lg">
+                    <a
+                      href="/mypage"
+                      className="block px-4 py-2 text-dark hover:bg-gray-200"
+                    >
+                      마이페이지
+                    </a>
+                    <a
+                      onClick={handleLogout}
+                      className="block cursor-pointer px-4 py-2 text-dark hover:bg-gray-200"
+                    >
+                      로그아웃
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <SearchModal

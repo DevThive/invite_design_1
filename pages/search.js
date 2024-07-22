@@ -4,33 +4,39 @@ import { getSinglePage } from "@lib/contentParser";
 import { slugify } from "@lib/utils/textConverter";
 import { useSearchContext } from "context/state";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 
 const SearchPage = ({ authors }) => {
   const router = useRouter();
   const { query } = router;
-  const keyword = slugify(query.key);
+  const keyword = slugify(query.key || ""); // 기본값 처리
   const { posts } = useSearchContext();
+  const [searchResults, setSearchResults] = useState([]);
 
-  const searchResults = posts.filter((product) => {
-    if (product.frontmatter.draft) {
-      return !product.frontmatter.draft;
-    }
-    if (slugify(product.frontmatter.title).includes(keyword)) {
-      return product;
-    } else if (
-      product.frontmatter.categories.find((category) =>
-        slugify(category).includes(keyword)
-      )
-    ) {
-      return product;
-    } else if (
-      product.frontmatter.tags.find((tag) => slugify(tag).includes(keyword))
-    ) {
-      return product;
-    } else if (slugify(product.content).includes(keyword)) {
-      return product;
-    }
-  });
+  useEffect(() => {
+    const controller = new AbortController(); // AbortController 생성
+    const fetchData = () => {
+      const results = posts.filter((post) => {
+        const { draft, title, categories, tags, content } = post.frontmatter;
+        if (draft) return false;
+
+        return (
+          slugify(title).includes(keyword) ||
+          categories.some((category) => slugify(category).includes(keyword)) ||
+          tags.some((tag) => slugify(tag).includes(keyword)) ||
+          slugify(content).includes(keyword)
+        );
+      });
+
+      setSearchResults(results);
+    };
+
+    fetchData();
+
+    return () => {
+      controller.abort(); // 컴포넌트 언마운트 시 요청 취소
+    };
+  }, [posts, keyword]); // posts와 keyword가 변경될 때마다 실행
 
   return (
     <Base title={`Search results for ${query.key}`}>
@@ -59,7 +65,7 @@ export const getStaticProps = () => {
   const authors = getSinglePage("content/authors");
   return {
     props: {
-      authors: authors,
+      authors,
     },
   };
 };

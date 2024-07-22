@@ -22,6 +22,20 @@ const Design = ({ data }) => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    const initAuth = async () => {
+      const storedToken = window.localStorage.getItem("access_token");
+      const token = storedToken;
+
+      if (!token) {
+        alert("로그인 이후에 이용해주세요.");
+
+        window.location.href = "/"; // 메인 페이지로 이동
+      }
+    };
+    initAuth();
+  });
+
+  useEffect(() => {
     if (imageSrc && imageRef.current) {
       const cropperInstance = new Cropper(imageRef.current, {
         aspectRatio: 595 / 842, // A4 비율

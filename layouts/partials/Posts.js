@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const Posts = ({ posts, authors, className }) => {
   const { summary_length } = config.settings;
-  console.log(posts);
+  // console.log(posts);
   return (
     <div className={`grid grid-cols-1 gap-16 sm:grid-cols-3 ${className}`}>
       {posts.map((post, i) => (
