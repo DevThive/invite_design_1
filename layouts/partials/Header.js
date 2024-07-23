@@ -6,6 +6,8 @@ import menu from "@config/menu.json";
 import SearchModal from "@layouts/partials/SearchModal";
 import axios from "axios";
 
+import { useAuth } from "context/AuthContext";
+
 // 로그인 및 회원가입 모달 컴포넌트
 const AuthModal = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState("login");
@@ -22,6 +24,8 @@ const AuthModal = ({ isOpen, onClose }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(null);
 
+  const auth = useAuth();
+
   const checkUsernameAvailability = async () => {
     try {
       const response = await axios.get(
@@ -32,6 +36,13 @@ const AuthModal = ({ isOpen, onClose }) => {
       console.error("아이디 중복 검사 오류:", error);
       setIsUsernameAvailable(false);
     }
+  };
+
+  const onSubmit = (event) => {
+    event.preventDefault(); // 기본 폼 제출 동작 방지
+    auth.login(event, { username, password }, (error) => {
+      console.error("로그인 시 에러:", error);
+    });
   };
 
   const handleSignup = async (event) => {
@@ -78,32 +89,6 @@ const AuthModal = ({ isOpen, onClose }) => {
     setPasswordMatch(e.target.value === signuppassword);
   };
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
-
-    try {
-      const response = await axios.post("http://localhost:4001/auth/login", {
-        username,
-        password,
-      });
-
-      if (response.status === 201) {
-        const data = response.data;
-
-        // alert("로그인 성공: " + JSON.stringify(data));
-        // 로컬 스토리지에 액세스 토큰과 사용자 데이터 저장
-        localStorage.setItem("access_token", data.accessToken);
-        localStorage.setItem("user_data", JSON.stringify(data.userData));
-
-        // 로그인 성공 후 필요한 동작을 여기에 추가하세요
-        window.location.href = "/"; // 메인 페이지로 이동
-      }
-    } catch (error) {
-      alert("로그인 실패: " + error.response.data.message);
-      // console.log(error);
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -142,13 +127,14 @@ const AuthModal = ({ isOpen, onClose }) => {
         </div>
         {activeTab === "login" && (
           <div>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={onSubmit}>
               <div className="mb-4">
                 <label className="block text-gray-700">아이디</label>
                 <input
                   type="text"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="아이디를 입력하세요"
+                  label="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -159,6 +145,7 @@ const AuthModal = ({ isOpen, onClose }) => {
                   type="password"
                   className="mt-1 w-full rounded border-gray-300 p-2"
                   placeholder="비밀번호를 입력하세요"
+                  label="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -289,6 +276,8 @@ const Header = () => {
   const [loginCheck, setLoginCheck] = useState(0);
   const [userData, setUserData] = useState(null);
 
+  const { logout } = useAuth();
+
   useEffect(() => {
     const changeNavbarBackground = () => {
       if (window.pageYOffset >= 1) {
@@ -314,15 +303,6 @@ const Header = () => {
 
     initAuth();
   }, []);
-
-  const handleLogout = () => {
-    // 로컬 스토리지에서 액세스 토큰과 사용자 데이터 삭제
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_data");
-
-    // 로그아웃 후 필요한 동작 추가 (예: 메인 화면으로 리다이렉트)
-    window.location.href = "/"; // 또는 React Router를 사용하는 경우 navigate('/') 사용
-  };
 
   return (
     <>
@@ -430,7 +410,7 @@ const Header = () => {
                       마이페이지
                     </a>
                     <a
-                      onClick={handleLogout}
+                      onClick={logout}
                       className="block cursor-pointer px-4 py-2 text-dark hover:bg-gray-200"
                     >
                       로그아웃

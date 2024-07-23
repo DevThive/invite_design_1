@@ -5,6 +5,8 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import TagManager from "react-gtm-module";
 import "styles/style.scss";
+import { AuthProvider } from "context/AuthContext";
+import { Router } from "next/router";
 
 const App = ({ Component, pageProps }) => {
   // import google font css
@@ -61,7 +63,9 @@ const App = ({ Component, pageProps }) => {
           content="width=device-width, initial-scale=1, maximum-scale=5"
         />
       </Head>
-      <Component {...pageProps} />
+      <AuthProvider>
+        <Component {...pageProps} />
+      </AuthProvider>
     </JsonContext>
   );
 };
