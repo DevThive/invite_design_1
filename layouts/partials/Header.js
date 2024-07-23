@@ -37,7 +37,7 @@ const AuthModal = ({ isOpen, onClose }) => {
   const handleSignup = async (event) => {
     event.preventDefault();
 
-    if (password !== confirmPassword) {
+    if (signuppassword !== confirmPassword) {
       alert("비밀번호가 일치하지 않습니다.");
       return;
     }
@@ -55,6 +55,13 @@ const AuthModal = ({ isOpen, onClose }) => {
         const data = response.data;
         alert("회원가입 성공: " + JSON.stringify(data));
         // 회원가입 성공 후 필요한 동작을 여기에 추가하세요
+        alert("회원가입 완료");
+
+        setActiveTab("login");
+        setSignupUsername("");
+        setSignupPassword("");
+        setEmail("");
+        setNickname("");
       }
     } catch (error) {
       alert("회원가입 실패: " + error.message);
